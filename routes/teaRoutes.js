@@ -96,6 +96,7 @@ router.patch("/update/:id", async (req, res) => {
     //first param = id
     //second param = changes I would like to make
     //last param = options
+
     const updatedTea = await Tea.findByIdAndUpdate(
       req.params.id,
       {
@@ -103,11 +104,14 @@ router.patch("/update/:id", async (req, res) => {
         description: req.body.description,
         category: req.body.category?.toLowerCase(), // normalization
         price: req.body.price,
-        $push: { ingredients: req.body.ingredients },
+        // the operator $push will add the new value to the array, even if it already exists
+        // $push: { ingredients: req.body.ingredients },
+        // the operator $addToSet will only add the value, if it does not exist
+        $addToSet: { ingredients: req.body.ingredients },
       },
       { new: true }
     );
-    //I didn't find a tea with this ID
+    // I didn't find a tea with this ID
     if (!updatedTea) {
       return res.status(404).json("Tea not found");
     }
