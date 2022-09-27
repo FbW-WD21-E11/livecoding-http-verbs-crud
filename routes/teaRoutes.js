@@ -73,8 +73,9 @@ router.post("/create", async (req, res) => {
       name: req.body.name,
       description: req.body.description,
       category: req.body.category?.toLowerCase(), // normalization
-      price: req.body.price,
       ingredients: req.body.ingredients,
+      price: req.body.price,
+      origin: req.body.origin,
     });
 
     return res.status(200).json({ message: "Tea created", createdTea });
@@ -119,6 +120,38 @@ router.patch("/update/:id", async (req, res) => {
     return res.status(200).json({ message: "Tea updated", updatedTea });
   } catch (error) {
     return res.status(500).json({ message: error.message });
+  }
+});
+
+router.patch("/comments/:id", async (req, res) => {
+  try {
+    const updatedTea = await Tea.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          comments: {
+            author: req.body.author,
+            text: req.body.text,
+          },
+        },
+      },
+      { new: true } // return updated record
+    );
+
+    res.status(200).send(updatedTea);
+  } catch (error) {
+    res.status(500).send("Error: " + error.message);
+  }
+});
+
+// find a comment by id
+router.get("/comments/:commentId", async (req, res) => {
+  try {
+    const tea = await Tea.find({ "comments._id": req.params.commentId });
+
+    res.status(200).send(tea);
+  } catch (error) {
+    res.status(500).send("Error: " + error.message);
   }
 });
 
